@@ -6,6 +6,7 @@
 -- 1. 세션 (한 번의 워크북 진행)
 create table sessions (
   id          uuid primary key default gen_random_uuid(),
+  user_id     uuid references auth.users(id) on delete cascade not null,
   created_at  timestamptz default now(),
   completed   boolean default false
 );
@@ -67,11 +68,48 @@ create table results (
 );
 
 -- ================================
--- RLS 비활성화 (혼자 쓰는 개인 프로젝트)
+-- RLS 활성화 + 정책 (각 유저는 자신의 데이터만 접근)
 -- ================================
-alter table sessions     disable row level security;
-alter table emotions     disable row level security;
-alter table emotion_reads disable row level security;
-alter table thoughts     disable row level security;
-alter table actions      disable row level security;
-alter table results      disable row level security;
+alter table sessions      enable row level security;
+alter table emotions      enable row level security;
+alter table emotion_reads enable row level security;
+alter table thoughts      enable row level security;
+alter table actions       enable row level security;
+alter table results       enable row level security;
+
+-- sessions: 본인 데이터만
+create policy "sessions_own" on sessions
+  for all using (auth.uid() = user_id);
+
+-- 나머지 테이블: session_id를 통해 본인 세션에 속한 데이터만
+create policy "emotions_own" on emotions
+  for all using (
+    exists (select 1 from sessions where sessions.id = emotions.session_id and sessions.user_id = auth.uid())
+  );
+
+create policy "emotion_reads_own" on emotion_reads
+  for all using (
+    exists (select 1 from sessions where sessions.id = emotion_reads.session_id and sessions.user_id = auth.uid())
+  );
+
+create policy "thoughts_own" on thoughts
+  for all using (
+    exists (select 1 from sessions where sessions.id = thoughts.session_id and sessions.user_id = auth.uid())
+  );
+
+create policy "actions_own" on actions
+  for all using (
+    exists (select 1 from sessions where sessions.id = actions.session_id and sessions.user_id = auth.uid())
+  );
+
+create policy "results_own" on results
+  for all using (
+    exists (select 1 from sessions where sessions.id = results.session_id and sessions.user_id = auth.uid())
+  );
+
+-- ================================
+-- 기존 DB에 user_id 컬럼 추가할 경우 (이미 테이블이 있다면)
+-- ================================
+-- alter table sessions add column user_id uuid references auth.users(id) on delete cascade;
+-- update sessions set user_id = '여기에-본인-user-id' where user_id is null;
+-- alter table sessions alter column user_id set not null;
