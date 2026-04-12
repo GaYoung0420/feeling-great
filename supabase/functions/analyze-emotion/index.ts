@@ -68,9 +68,10 @@ Deno.serve(async (req: Request) => {
 
     const raw = (message.content[0] as { type: string; text: string }).text.trim();
 
-    // JSON 파싱 (마크다운 코드블록 제거)
-    const jsonStr = raw.replace(/^```json?\n?/, "").replace(/\n?```$/, "").trim();
-    const result = JSON.parse(jsonStr);
+    // JSON 파싱 — 첫 번째 { 부터 마지막 } 까지만 추출
+    const jsonMatch = raw.match(/\{[\s\S]*\}/);
+    if (!jsonMatch) throw new Error("No JSON found in response");
+    const result = JSON.parse(jsonMatch[0]);
 
     const corsHeaders = {
       "Access-Control-Allow-Origin": "*",
