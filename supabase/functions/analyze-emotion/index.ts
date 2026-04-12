@@ -38,7 +38,7 @@ Deno.serve(async (req: Request) => {
       headers: {
         "Access-Control-Allow-Origin": "*",
         "Access-Control-Allow-Methods": "POST, OPTIONS",
-        "Access-Control-Allow-Headers": "Content-Type, Authorization",
+        "Access-Control-Allow-Headers": "Content-Type, Authorization, apikey, x-client-info",
       },
     });
   }
@@ -72,17 +72,22 @@ Deno.serve(async (req: Request) => {
     const jsonStr = raw.replace(/^```json?\n?/, "").replace(/\n?```$/, "").trim();
     const result = JSON.parse(jsonStr);
 
+    const corsHeaders = {
+      "Access-Control-Allow-Origin": "*",
+      "Access-Control-Allow-Headers": "Content-Type, Authorization, apikey, x-client-info",
+    };
     return new Response(JSON.stringify(result), {
-      headers: {
-        "Content-Type": "application/json",
-        "Access-Control-Allow-Origin": "*",
-      },
+      headers: { "Content-Type": "application/json", ...corsHeaders },
     });
   } catch (err) {
     console.error("analyze-emotion error:", err);
     return new Response(JSON.stringify({ error: "분석 중 오류가 발생했습니다." }), {
       status: 500,
-      headers: { "Content-Type": "application/json", "Access-Control-Allow-Origin": "*" },
+      headers: {
+        "Content-Type": "application/json",
+        "Access-Control-Allow-Origin": "*",
+        "Access-Control-Allow-Headers": "Content-Type, Authorization, apikey, x-client-info",
+      },
     });
   }
 });
