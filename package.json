@@ -1,0 +1,21 @@
+{
+  "name": "feeling-great",
+  "version": "1.0.0",
+  "description": "> 감정은 명령이 아니라 정보예요. > 느끼고 · 읽고 · 수정하고 · 행동으로 연결해요.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/GaYoung0420/feeling-great.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/GaYoung0420/feeling-great/issues"
+  },
+  "homepage": "https://github.com/GaYoung0420/feeling-great#readme"
+}
